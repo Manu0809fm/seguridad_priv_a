@@ -25,7 +25,7 @@ val newLogs = if (existingLogs.isEmpty()) {
     "$existingLogs\\n$logEntry"
 }
 
-- Vulnerabilidad 2:
+2.- Vulnerabilidad 2:
 Posible crecimiento indefinido y problemas de concurrencia
 Cada vez que se agrega un log, se lee todo el historial, se agrega una línea y se vuelve a escribir todo.
 Esto puede causar:
