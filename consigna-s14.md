@@ -16,7 +16,7 @@ Encriptación de valores con AES256_GCM.
   
 - Identifica al menos 2 posibles vulnerabilidades en la implementación actual del logging
   
-Vulnerabilidad 1:
+- Vulnerabilidad 1:
 Uso incorrecto de separadores de línea en logs
 En el código, para separar líneas se usa la cadena literal "\\n" (doble barra invertida + n), que en realidad guarda el texto \n en lugar de un salto de línea real.
 val newLogs = if (existingLogs.isEmpty()) {
@@ -25,7 +25,7 @@ val newLogs = if (existingLogs.isEmpty()) {
     "$existingLogs\\n$logEntry"
 }
 
-Vulnerabilidad 2:
+- Vulnerabilidad 2:
 Posible crecimiento indefinido y problemas de concurrencia
 Cada vez que se agrega un log, se lee todo el historial, se agrega una línea y se vuelve a escribir todo.
 Esto puede causar:
@@ -41,14 +41,14 @@ Se pierde la protección de confidencialidad para esos datos, aumentando el ries
 Examina `AndroidManifest.xml` y `MainActivity.kt`:
 - Lista todos los permisos peligrosos declarados en el manifiesto
   
-Cámara (android.permission.CAMERA)
-Leer almacenamiento externo (android.permission.READ_EXTERNAL_STORAGE)
-Leer imágenes (android.permission.READ_MEDIA_IMAGES)
-Grabar audio (android.permission.RECORD_AUDIO)
-Leer contactos (android.permission.READ_CONTACTS)
-Llamar por teléfono (android.permission.CALL_PHONE)
-Enviar SMS (android.permission.SEND_SMS)
-Acceso a ubicación aproximada (android.permission.ACCESS_COARSE_LOCATION)
+- Cámara (android.permission.CAMERA)
+- Leer almacenamiento externo (android.permission.READ_EXTERNAL_STORAGE)
+- Leer imágenes (android.permission.READ_MEDIA_IMAGES)
+- Grabar audio (android.permission.RECORD_AUDIO)
+- Leer contactos (android.permission.READ_CONTACTS)
+- Llamar por teléfono (android.permission.CALL_PHONE)
+- Enviar SMS (android.permission.SEND_SMS)
+- Acceso a ubicación aproximada (android.permission.ACCESS_COARSE_LOCATION)
 
 - ¿Qué patrón se utiliza para solicitar permisos en runtime?
 
