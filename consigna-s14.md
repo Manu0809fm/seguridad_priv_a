@@ -107,29 +107,6 @@ fun verifyDataIntegrity(key: String): Boolean {
     // Tu implementación aquí
 }
 ```
-Esto impide que Android haga un respaldo automático de los datos de la app, ayudando a proteger información sensible.
-### 1.3 Gestión de Archivos (3 puntos)
-
-Revisa `CameraActivity.kt` y `file_paths.xml`:
-
-- **¿Cómo se implementa la compartición segura de archivos de imágenes?**
-
-  Se usa un `FileProvider` que genera un URI con permisos temporales para compartir archivos. Esto permite que otras apps (como la cámara) puedan acceder a los archivos sin exponer rutas directas ni dar permisos permanentes.  
-  En el código, al crear la foto, se genera un URI con `FileProvider.getUriForFile()`, y ese URI se usa para tomar la foto y mostrarla.
-
-- **¿Qué autoridad se utiliza para el FileProvider?**
-
-  La autoridad usada es:  
-com.example.seguridad_priv_a.fileprovider
-Esta se declara en el manifiesto y luego se usa en el código para generar URIs seguros.
-
-- **Explica por qué no se debe usar `file://` URIs directamente**
-
-- Porque los URIs con esquema `file://` exponen la ruta exacta del archivo.  
-- No otorgan permisos seguros a otras aplicaciones.  
-- En Android 7+ generan errores debido a restricciones de seguridad.  
-- `FileProvider` crea URIs con permisos temporales que protegen la privacidad y seguridad del archivo.
-
 ### 2.2 Sistema de Auditoría Avanzado (3 puntos)
 Crea una nueva clase `SecurityAuditManager` que:
 - Detecte intentos de acceso sospechosos (múltiples solicitudes en corto tiempo)
