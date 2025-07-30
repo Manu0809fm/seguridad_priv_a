@@ -8,20 +8,70 @@ Esta evaluación técnica se basa en una aplicación Android que implementa un s
 ### 1.1 Identificación de Vulnerabilidades (2 puntos)
 Analiza el archivo `DataProtectionManager.kt` y responde:
 - ¿Qué método de encriptación se utiliza para proteger datos sensibles?
+ Se usa EncryptedSharedPreferences con:
+Clave maestra (MasterKey) usando el esquema AES256_GCM.
+Encriptación de llaves con AES256_SIV.
+Encriptación de valores con AES256_GCM.
+  
 - Identifica al menos 2 posibles vulnerabilidades en la implementación actual del logging
+- 
+Vulnerabilidad 1:
+Uso incorrecto de separadores de línea en logs
+En el código, para separar líneas se usa la cadena literal "\\n" (doble barra invertida + n), que en realidad guarda el texto \n en lugar de un salto de línea real.
+val newLogs = if (existingLogs.isEmpty()) {
+    logEntry
+} else {
+    "$existingLogs\\n$logEntry"
+}
+
+Vulnerabilidad 2:
+Posible crecimiento indefinido y problemas de concurrencia
+Cada vez que se agrega un log, se lee todo el historial, se agrega una línea y se vuelve a escribir todo.
+Esto puede causar:
+Crecimiento innecesario del almacenamiento (performance degradada).
+Condiciones de carrera si múltiples hilos o procesos acceden simultáneamente, causando pérdida o corrupción de logs.
+
 - ¿Qué sucede si falla la inicialización del sistema de encriptación?
+  
+Los datos sensibles NO estarán encriptados, quedando almacenados en texto plano.
+Se pierde la protección de confidencialidad para esos datos, aumentando el riesgo ante accesos no autorizados.
 
 ### 1.2 Permisos y Manifiesto (2 puntos)
 Examina `AndroidManifest.xml` y `MainActivity.kt`:
 - Lista todos los permisos peligrosos declarados en el manifiesto
+  
+Cámara (android.permission.CAMERA)
+Leer almacenamiento externo (android.permission.READ_EXTERNAL_STORAGE)
+Leer imágenes (android.permission.READ_MEDIA_IMAGES)
+Grabar audio (android.permission.RECORD_AUDIO)
+Leer contactos (android.permission.READ_CONTACTS)
+Llamar por teléfono (android.permission.CALL_PHONE)
+Enviar SMS (android.permission.SEND_SMS)
+Acceso a ubicación aproximada (android.permission.ACCESS_COARSE_LOCATION)
+
 - ¿Qué patrón se utiliza para solicitar permisos en runtime?
+
+Se usa un método moderno que se llama Activity Result API, con registerForActivityResult. Básicamente, cuando el usuario toca un permiso, la app pide ese permiso, y cuando el usuario responde (lo acepta o lo niega), la app recibe esa respuesta y actúa según sea el caso.
+
 - Identifica qué configuración de seguridad previene backups automáticos
+
+En la etiqueta <application>, está esto:
+android:allowBackup="false"
+Eso hace que Android no permita que se haga un respaldo automático de los datos de la app, lo que ayuda a proteger información sensible.
 
 ### 1.3 Gestión de Archivos (3 puntos)
 Revisa `CameraActivity.kt` y `file_paths.xml`:
 - ¿Cómo se implementa la compartición segura de archivos de imágenes?
+  
+Se usa un FileProvider que genera un URI con permisos temporales para compartir archivos. Esto permite que otras apps (por ejemplo, la cámara) puedan acceder a los archivos sin exponer rutas de archivos directas ni dar permisos permanentes. En el código, cuando se crea la foto, se genera un URI con FileProvider.getUriForFile(), y ese URI se usa para tomar la foto y mostrarla.
+
 - ¿Qué autoridad se utiliza para el FileProvider?
+  
+La autoridad usada es "com.example.seguridad_priv_a.fileprovider", que se declara en el manifiesto y es usada luego en el código para generar los URIs seguros.
+
 - Explica por qué no se debe usar `file://` URIs directamente
+  
+Porque los URIs con esquema file:// exponen la ruta exacta del archivo y no otorgan permisos seguros a otras apps. Esto puede causar errores en Android (especialmente desde Android 7+) y problemas de seguridad, porque no se controla quién accede al archivo. En cambio, el FileProvider crea un URI con permisos temporales que protege la privacidad y seguridad de los archivos.
 
 ## Parte 2: Implementación y Mejoras Intermedias (8-14 puntos)
 
