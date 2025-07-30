@@ -41,14 +41,14 @@ Se pierde la protección de confidencialidad para esos datos, aumentando el ries
 Examina `AndroidManifest.xml` y `MainActivity.kt`:
 - Lista todos los permisos peligrosos declarados en el manifiesto
   
-- Cámara (android.permission.CAMERA)
-- Leer almacenamiento externo (android.permission.READ_EXTERNAL_STORAGE)
-- Leer imágenes (android.permission.READ_MEDIA_IMAGES)
-- Grabar audio (android.permission.RECORD_AUDIO)
-- Leer contactos (android.permission.READ_CONTACTS)
-- Llamar por teléfono (android.permission.CALL_PHONE)
-- Enviar SMS (android.permission.SEND_SMS)
-- Acceso a ubicación aproximada (android.permission.ACCESS_COARSE_LOCATION)
+1.- Cámara (android.permission.CAMERA)
+2.- Leer almacenamiento externo (android.permission.READ_EXTERNAL_STORAGE)
+3.- Leer imágenes (android.permission.READ_MEDIA_IMAGES)
+4.- Grabar audio (android.permission.RECORD_AUDIO)
+5.- Leer contactos (android.permission.READ_CONTACTS)
+6.- Llamar por teléfono (android.permission.CALL_PHONE)
+7.- Enviar SMS (android.permission.SEND_SMS)
+8.- Acceso a ubicación aproximada (android.permission.ACCESS_COARSE_LOCATION)
 
 - ¿Qué patrón se utiliza para solicitar permisos en runtime?
 
