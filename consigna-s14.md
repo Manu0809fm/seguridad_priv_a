@@ -14,7 +14,7 @@ Encriptación de llaves con AES256_SIV.
 Encriptación de valores con AES256_GCM.
   
 - Identifica al menos 2 posibles vulnerabilidades en la implementación actual del logging
-- 
+  
 Vulnerabilidad 1:
 Uso incorrecto de separadores de línea en logs
 En el código, para separar líneas se usa la cadena literal "\\n" (doble barra invertida + n), que en realidad guarda el texto \n en lugar de un salto de línea real.
