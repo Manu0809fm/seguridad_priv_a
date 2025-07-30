@@ -8,7 +8,8 @@ Esta evaluación técnica se basa en una aplicación Android que implementa un s
 ### 1.1 Identificación de Vulnerabilidades (2 puntos)
 Analiza el archivo `DataProtectionManager.kt` y responde:
 - ¿Qué método de encriptación se utiliza para proteger datos sensibles?
- Se usa EncryptedSharedPreferences con:
+
+Se usa EncryptedSharedPreferences con:
 Clave maestra (MasterKey) usando el esquema AES256_GCM.
 Encriptación de llaves con AES256_SIV.
 Encriptación de valores con AES256_GCM.
