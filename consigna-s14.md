@@ -93,10 +93,59 @@ Esta se declara en el manifiesto y luego se usa en el código para generar URIs 
 
 ### 2.1 Fortalecimiento de la Encriptación (3 puntos)
 Modifica `DataProtectionManager.kt` para implementar:
-- Rotación automática de claves maestras cada 30 días
-- Verificación de integridad de datos encriptados usando HMAC
-- Implementación de key derivation con salt único por usuario
 
+- Rotación automática de claves maestras cada 30 días
+**Descripción:**
+Cada 30 días se fuerza la rotación de la clave maestra utilizada por `EncryptedSharedPreferences`. Se almacena la última fecha de rotación en el mismo archivo seguro.
+
+**Código relevante:**
+
+```kotlin
+private fun shouldRotateKey(): Boolean {
+    val lastRotation = securePrefs.getLong("last_rotation", 0L)
+    val currentTime = System.currentTimeMillis()
+    return (currentTime - lastRotation) > TimeUnit.DAYS.toMillis(30)
+}
+
+private fun rotateEncryptionKey() {
+    if (shouldRotateKey()) {
+        securePrefs.edit().putLong("last_rotation", System.currentTimeMillis()).apply()
+        Log.d("Security", "Encryption key rotated.")
+    }
+}
+```
+- Verificación de integridad de datos encriptados usando HMAC
+```kotlin
+fun saveSecureData(key: String, value: String, userId: String) {
+    val hmac = generateHMAC(value, userId)
+    securePrefs.edit()
+        .putString(key, value)
+        .putString("${key}_hmac", hmac)
+        .apply()
+}
+
+fun verifyDataIntegrity(key: String): Boolean {
+    val value = securePrefs.getString(key, null) ?: return false
+    val storedHmac = securePrefs.getString("${key}_hmac", null) ?: return false
+    val userId = securePrefs.getString("user_id", "default_user") ?: "default_user"
+    val computedHmac = generateHMAC(value, userId)
+    return storedHmac == computedHmac
+}
+```
+- Implementación de key derivation con salt único por usuario
+```kotlin
+private fun generateHMAC(data: String, userId: String): String {
+    val salt = userId.toByteArray(StandardCharsets.UTF_8)
+    val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+    val spec = PBEKeySpec(userId.toCharArray(), salt, 10000, 256)
+    val secret = factory.generateSecret(spec).encoded
+    val hmacKey = SecretKeySpec(secret, "HmacSHA256")
+    val mac = Mac.getInstance("HmacSHA256")
+    mac.init(hmacKey)
+    val result = mac.doFinal(data.toByteArray(StandardCharsets.UTF_8))
+    return Base64.encodeToString(result, Base64.NO_WRAP)
+}
+```
 ```kotlin
 // Ejemplo de estructura esperada
 fun rotateEncryptionKey(): Boolean {
