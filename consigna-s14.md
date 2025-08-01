@@ -163,12 +163,106 @@ Crea una nueva clase `SecurityAuditManager` que:
 - Genere alertas cuando se detecten patrones anómalos
 - Exporte logs en formato JSON firmado digitalmente
 
+1. SecurityAuditManager.kt
+
+Clase personalizada encargada de:
+
+⚡ Detección de accesos sospechosos: identifica intentos múltiples en corto tiempo por ID de permiso.
+
+⛔ Rate limiting: bloquea acciones cuando hay muchos accesos seguidos (por defecto más de 3 intentos en 10 segundos).
+
+🚨 Generación de alertas: muestra un AlertDialog si se detectan patrones anómalos.
+
+📃 Exportación de logs firmados: exporta un archivo .json con los eventos registrados, firmado digitalmente con HMAC-SHA256.
+```kotlin
+val securityAuditManager = SecurityAuditManager.getInstance(context)
+val allowed = securityAuditManager.registerAccess("Camera")
+if (allowed) {
+    startActivity(Intent(context, CameraActivity::class.java))
+} else {
+    // Bloqueado por actividad sospechosa
+}
+```
+📂 Estructura del Proyecto
+```kotlin
+com.example.seguridad_priv_a
+|├── data/
+|   ├── DataProtectionManager.kt
+|   ├── PermissionItem.kt
+|   └── SecurityAuditManager.kt   ← Nueva clase implementada
+|
+|├── adapter/
+|   └── PermissionsAdapter.kt
+|
+|├── MainActivity.kt               ← Integración con SecurityAuditManager
+|├── CameraActivity.kt
+|├── CalendarActivity.kt
+|├── MicrophoneActivity.kt
+|└── StorageActivity.kt
+```
 ### 2.3 Biometría y Autenticación (3 puntos)
 Implementa autenticación biométrica en `DataProtectionActivity.kt`:
 - Integra BiometricPrompt API para proteger el acceso a logs
 - Implementa fallback a PIN/Pattern si biometría no está disponible
 - Añade timeout de sesión tras inactividad de 5 minutos
+#### 🔐 1. Autenticación Biométrica (Huella, Rostro, etc.)
+Se ha integrado la API `BiometricPrompt` de Android para permitir el acceso a la actividad **solo mediante autenticación biométrica válida**.
 
+- Al iniciar la actividad, se muestra un cuadro de diálogo biométrico al usuario.
+- Si el usuario cancela o falla la autenticación, no puede acceder a los datos sensibles.
+- La autenticación se vuelve a solicitar si la app es reabierta tras tiempo de inactividad.
+
+#### 🔁 2. Mecanismo de Respaldo (Fallback)
+Si el dispositivo **no cuenta con sensores biométricos** o el usuario no tiene una biometría configurada, se usa un **fallback manual**, actualmente simulado como un diálogo personalizado que permite ingresar un código de respaldo (PIN o patrón simulado).
+
+> 📌 Este fallback puede conectarse con almacenamiento cifrado o autenticación real basada en contraseña en futuras versiones.
+
+#### ⏳ 3. Expiración de Sesión (Inactividad > 5 min)
+Se implementó un sistema de control de sesión que:
+- Guarda la hora del último uso mediante `EncryptedSharedPreferences`.
+- Al volver a abrir la actividad, se compara la hora actual con la última actividad.
+- Si han pasado más de **5 minutos de inactividad**, se solicita **reautenticación**.
+
+---
+### 📁 Archivos Relevantes
+
+- `DataProtectionActivity.kt`: Lógica de autenticación biométrica y verificación de sesión.
+- `DataProtectionManager.kt`: Clase encargada del almacenamiento seguro y auditoría.
+- `res/xml/biometric_prompt.xml`: (opcional) Configuración visual del prompt.
+- `AndroidManifest.xml`: Incluye permisos y declaración de la actividad protegida.
+
+---
+```kotlin
+private fun setupBiometricAuthentication() {
+    val executor = ContextCompat.getMainExecutor(this)
+
+    biometricPrompt = BiometricPrompt(this, executor,
+        object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                Toast.makeText(applicationContext, "Autenticación exitosa", Toast.LENGTH_SHORT).show()
+                // Permitir acceso a los datos protegidos
+                lastInteractionTime = System.currentTimeMillis()
+            }
+
+            override fun onAuthenticationFailed() {
+                super.onAuthenticationFailed()
+                Toast.makeText(applicationContext, "Autenticación fallida", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                Toast.makeText(applicationContext, "Error: $errString", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+    promptInfo = BiometricPrompt.PromptInfo.Builder()
+        .setTitle("Autenticación Requerida")
+        .setSubtitle("Usa tu huella o patrón para continuar")
+        .setDeviceCredentialAllowed(true) // Permite PIN/Patrón como fallback
+        .build()
+}
+```
 ## Parte 3: Arquitectura de Seguridad Avanzada (15-20 puntos)
 
 ### 3.1 Implementación de Zero-Trust Architecture (3 puntos)
