@@ -278,7 +278,66 @@ Implementa medidas anti-tampering:
 - Obfuscación de strings sensibles y constantes criptográficas
 - Verificación de firma digital de la aplicación en runtime
 - Implementación de certificate pinning para comunicaciones futuras
+# 3.2 - Seguridad en Android: Protección de Datos y Permisos
 
+## 📱 Descripción General
+
+Este proyecto Android en Kotlin implementa mecanismos de seguridad enfocados en la **protección de datos sensibles** y el **control de permisos**, utilizando prácticas modernas como `EncryptedSharedPreferences`, detección de debugging, cifrado HMAC, derivación de claves con `PBKDF2`, y políticas de permisos explícitas.
+
+## ✅ Funcionalidades Implementadas
+
+### 🔐 Protección de Datos
+- Uso de `EncryptedSharedPreferences` para guardar datos sensibles cifrados.
+- Generación de claves maestras mediante `MasterKey`.
+- Implementación de rotación automática de claves cada 30 días.
+- Integridad verificada con HMAC (SHA-256).
+- Derivación de claves personalizadas con salt por usuario usando PBKDF2.
+
+### 🛡️ Seguridad Avanzada
+- Detección de debugging (modo desarrollador) para cerrar la app si se detecta.
+- Ofuscación de strings sensibles.
+- Uso de ProGuard/R8 para minimizar y ofuscar código en versiones `release`.
+
+### 🔧 Permisos Sensibles
+- Actividades individuales para cada permiso:
+  - Cámara (`CameraActivity`)
+  - Micrófono (`MicrophoneActivity`)
+  - Calendario (`CalendarActivity`)
+  - Almacenamiento (`StorageActivity`)
+- Solicitud dinámica de permisos sensibles.
+- Iconos personalizados e interfaz simple para usuarios.
+
+## 📂 Estructura del Proyecto
+
+├── app/
+│ ├── java/com/example/seguridad_priv_a/
+│ │ ├── MainActivity.kt
+│ │ ├── CameraActivity.kt
+│ │ ├── MicrophoneActivity.kt
+│ │ ├── CalendarActivity.kt
+│ │ ├── StorageActivity.kt
+│ │ ├── PermissionsApplication.kt
+│ │ ├── data/
+│ │ │ ├── DataProtectionManager.kt
+│ │ │ └── PermissionItem.kt
+│ │ └── adapter/
+│ │ └── PermissionsAdapter.kt
+│ └── res/
+│ ├── layout/
+│ ├── values/
+│ └── xml/
+
+## ⚙️ Configuración de ProGuard (build.gradle)
+
+```groovy
+buildTypes {
+    release {
+        minifyEnabled true
+        shrinkResources true
+        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+}
+```
 ### 3.3 Framework de Anonimización Avanzado (2 puntos)
 Mejora el método `anonymizeData()` actual implementando:
 - Algoritmos de k-anonimity y l-diversity
